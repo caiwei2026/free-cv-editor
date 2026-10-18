@@ -764,6 +764,7 @@
   .cv-meta-clear,
   .cv-date-clear,
   .cv-bullet-del,
+  .cv-avatar-empty,
   .page-pop {
     display: none !important;
   }
