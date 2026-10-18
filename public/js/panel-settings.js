@@ -54,6 +54,9 @@
       }
     });
 
+    const reloadBtn = h('button', { class: 'btn', type: 'button' }, '从本机文件重新载入');
+    reloadBtn.addEventListener('click', () => App.ui.reloadFromFile());
+
     const resetBtn = h('button', { class: 'btn', type: 'button', style: 'color:#b23c2e' }, '恢复示例简历');
     resetBtn.addEventListener('click', () => {
       if (!window.confirm('会清空当前内容，恢复成示例简历。建议先导出备份，确定吗？')) return;
@@ -69,7 +72,14 @@
 
     const row1 = h('div', { class: 'btn-row' });
     row1.append(exportBtn, importBtn);
-    dataBlock.append(row1, importInput, h('div', { style: 'height:8px' }), resetBtn);
+    const row2 = h('div', { class: 'btn-row', style: 'margin-top:8px' });
+    row2.append(reloadBtn, resetBtn);
+    dataBlock.append(
+      row1,
+      importInput,
+      row2,
+      h('p', { class: 'muted', style: 'margin:6px 0 0' }, '「从本机文件重新载入」会读取 data/resume.json，覆盖页面上的浏览器缓存版本。'),
+    );
 
     const pathNote = h('div', { class: 'path-note' });
     pathNote.innerHTML = `<strong>保存位置</strong><span>${escapeHtml(App.dataPath || 'data/resume.json')}</span><span>以及浏览器 localStorage（双保险）</span>`;

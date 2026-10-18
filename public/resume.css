@@ -79,6 +79,16 @@
   padding: 13mm 24mm 11mm;
 }
 
+/* ---------------- 页面背景水印 ---------------- */
+.page-watermark {
+  position: absolute;
+  z-index: 0;
+  height: auto;
+  pointer-events: none;
+  user-select: none;
+  -webkit-user-drag: none;
+}
+
 /* ---------------- 基本信息 ---------------- */
 .cv-info {
   display: flex;

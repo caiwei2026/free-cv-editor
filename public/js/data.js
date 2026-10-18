@@ -12,7 +12,7 @@
       text: '',
       bullets: [],
       dots: true,
-      fields: { title: true, date: true, meta: true },
+      fields: { title: true, date: true, meta: true, text: true },
       dateBelow: false,
       style: null,
       ...fields,
@@ -57,6 +57,14 @@
         enabled: false,
         size: 12,
         columns: [{ id: 'stamp-main', text: DEFAULT_STAMP }],
+      },
+      watermark: {
+        enabled: false,
+        src: 'assets/deepseek-whale.svg',
+        opacity: 0.5,
+        width: 36,
+        top: 8,
+        right: 8,
       },
     },
     view: { guide: true },
@@ -471,6 +479,19 @@
       columns: stampColumns,
     };
 
+    const watermarkSource = (raw.theme && raw.theme.watermark) || base.theme.watermark;
+    data.theme.watermark = {
+      enabled: Boolean(watermarkSource.enabled),
+      src:
+        typeof watermarkSource.src === 'string' && watermarkSource.src.trim()
+          ? watermarkSource.src.trim()
+          : 'assets/deepseek-whale.svg',
+      opacity: num(watermarkSource.opacity, 0.05, 0.9, 0.5),
+      width: num(watermarkSource.width, 12, 80, 36),
+      top: num(watermarkSource.top, 0, 40, 8),
+      right: num(watermarkSource.right, 0, 40, 8),
+    };
+
     data.view = { guide: true, ...(raw.view || {}) };
 
     data.stickers = Array.isArray(raw.stickers)
@@ -529,6 +550,7 @@
               title: !(i.fields && i.fields.title === false),
               date: !(i.fields && i.fields.date === false),
               meta: !(i.fields && i.fields.meta === false),
+              text: !(i.fields && i.fields.text === false),
             },
             dateBelow: Boolean(i.dateBelow),
             style: styleOr(i.style),
@@ -584,7 +606,7 @@
             text: value,
             bullets: [],
             dots: true,
-            fields: { title: true, date: true, meta: true },
+            fields: { title: true, date: true, meta: true, text: true },
             dateBelow: false,
             style: it.style || null,
           });

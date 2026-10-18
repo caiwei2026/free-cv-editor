@@ -387,7 +387,7 @@
   }
 
   function openFields(item, anchor, kind = 'timeline') {
-    const fields = item.fields || { title: true, date: true, meta: true };
+    const fields = item.fields || { title: true, date: true, meta: true, text: true };
     const isList = kind === 'list';
     openPagePop(anchor, (pop) => {
       pop.append(popHead('这一条显示'));
@@ -407,6 +407,11 @@
         renderPage();
         App.ui.updateScale();
       };
+      if (kind === 'text') {
+        check('段落', fields.text !== false, (v) => commit({ text: v }));
+        pop.append(h('p', { class: 'page-pop-hint' }, '隐藏段落后只保留分点；内容仍在，随时可以再打开。'));
+        return;
+      }
       check('标题', fields.title !== false, (v) => commit({ title: v }));
       check('时间', fields.date !== false, (v) => commit({ date: v }));
       if (!isList) {
@@ -517,6 +522,11 @@
       fieldsBtn = toolBtn('sliders', () => openFields(item, fieldsBtn, 'list'), '显示 / 隐藏标题、时间');
       tools.append(fieldsBtn);
     }
+    if (sec.kind === 'text') {
+      let fieldsBtn;
+      fieldsBtn = toolBtn('sliders', () => openFields(item, fieldsBtn, 'text'), '显示 / 隐藏段落');
+      tools.append(fieldsBtn);
+    }
     if (sec.kind === 'info') {
       let styleBtn;
       styleBtn = toolAaBtn(() => openLineStyle(item, infoLine, styleBtn), '单独设置这一行样式');
@@ -584,7 +594,12 @@
       item.bullets.forEach((_, idx) => ul.append(renderBullet(item, idx)));
       el.append(ul);
     } else if (sec.kind === 'text') {
-      el.append(ce(item, 'text', { tag: 'p', placeholder: '写一段自我介绍…', className: 'cv-text', singleLine: false }));
+      const fields = item.fields || {};
+      if (fields.text !== false) {
+        el.append(
+          ce(item, 'text', { tag: 'p', placeholder: '写一段自我介绍…', className: 'cv-text', singleLine: false }),
+        );
+      }
       if (item.bullets.length) {
         const ul = h('ul', { class: `cv-bullets${item.dots === false ? ' no-dots' : ''}` });
         item.bullets.forEach((_, idx) => ul.append(renderBullet(item, idx)));
@@ -1261,6 +1276,20 @@
     const keepScroll = scroll ? scroll.scrollTop : 0;
 
     page.innerHTML = '';
+
+    const watermark = data.theme.watermark;
+    if (watermark && watermark.enabled && watermark.src) {
+      page.append(
+        h('img', {
+          class: 'page-watermark',
+          src: watermark.src,
+          alt: '',
+          'aria-hidden': 'true',
+          style: `width:${watermark.width}mm;top:${watermark.top}mm;right:${watermark.right}mm;opacity:${watermark.opacity};`,
+        }),
+      );
+    }
+
     page.dataset.font = data.theme.font;
     page.dataset.heading = data.theme.heading;
     page.dataset.density = data.theme.density;

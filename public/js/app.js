@@ -410,6 +410,28 @@
     scheduleSave();
   }
 
+  async function reloadFromFile() {
+    if (!window.confirm('从本机 data/resume.json 重新载入？页面里尚未写回文件的修改会丢失。')) return;
+    try {
+      const res = await fetch('/api/resume', { cache: 'no-store' });
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      const json = await res.json();
+      if (!json?.data) throw new Error('本机文件里还没有简历数据');
+      state.data = App.data.normalize(json.data);
+      state.activeSection = null;
+      state.selectedSticker = null;
+      App.render.page();
+      App.render.outline();
+      syncGuideBtn();
+      updateScale();
+      resetHistory();
+      state.scheduleSave({ history: false });
+      toast('已从本机文件重新载入');
+    } catch (err) {
+      toast(err.message || '重新载入失败，确认本地服务还开着', { error: true });
+    }
+  }
+
   // ---------------- 导入导出 ----------------
   function exportJson() {
     const now = new Date();
@@ -648,6 +670,7 @@
     exportJson,
     addSection,
     checkService,
+    reloadFromFile,
     undo,
     redo,
   };

@@ -450,6 +450,64 @@
     });
     resetBlock.append(resetBtn);
 
+    const watermark = theme.watermark || {};
+    const watermarkBlock = sectionBlock('背景水印', '右上角 · DeepSeek 鲸鱼');
+    const watermarkToggle = h('div', { class: 'row between' });
+    watermarkToggle.append(h('span', { class: 'muted', text: '显示右上角鲸鱼水印' }));
+    watermarkToggle.append(
+      switchControl(Boolean(watermark.enabled), (on) => {
+        watermark.enabled = on;
+        App.ui.applyTheme({ watermark });
+        rerender();
+      }),
+    );
+
+    const wmOpacityRow = h('div', { class: 'typography-row' });
+    const wmOpacityHead = h('div', { class: 'slider-head' });
+    const wmOpacityValue = h('span', { class: 'slider-val', text: `${Math.round((watermark.opacity ?? 0.5) * 100)}%` });
+    wmOpacityHead.append(h('span', { text: '透明度' }), wmOpacityValue);
+    const wmOpacity = h('input', {
+      class: 'slider',
+      type: 'range',
+      min: '10',
+      max: '90',
+      step: '5',
+      value: String(Math.round((watermark.opacity ?? 0.5) * 100)),
+      'aria-label': '水印透明度',
+    });
+    wmOpacity.addEventListener('input', () => {
+      watermark.opacity = Number(wmOpacity.value) / 100;
+      wmOpacityValue.textContent = `${wmOpacity.value}%`;
+      App.ui.applyTheme({ watermark });
+    });
+    wmOpacityRow.append(wmOpacityHead, wmOpacity);
+
+    const wmSizeRow = h('div', { class: 'typography-row' });
+    const wmSizeHead = h('div', { class: 'slider-head' });
+    const wmSizeValue = h('span', { class: 'slider-val', text: `${Math.round(watermark.width ?? 36)}mm` });
+    wmSizeHead.append(h('span', { text: '大小' }), wmSizeValue);
+    const wmSize = h('input', {
+      class: 'slider',
+      type: 'range',
+      min: '20',
+      max: '60',
+      step: '2',
+      value: String(Math.round(watermark.width ?? 36)),
+      'aria-label': '水印大小',
+    });
+    wmSize.addEventListener('input', () => {
+      watermark.width = Number(wmSize.value);
+      wmSizeValue.textContent = `${wmSize.value}mm`;
+      App.ui.applyTheme({ watermark });
+    });
+    wmSizeRow.append(wmSizeHead, wmSize);
+    watermarkBlock.append(
+      watermarkToggle,
+      wmOpacityRow,
+      wmSizeRow,
+      h('p', { class: 'muted', style: 'margin:2px 0 0' }, '官方 DeepSeek 鲸鱼图标；默认 50% 透明度，随 PDF 一起打印。'),
+    );
+
     const advancedBlock = h('details', { class: 'drawer-section advanced-section' });
     advancedBlock.open = Boolean(App.state.advancedOpen);
     advancedBlock.addEventListener('toggle', () => {
@@ -460,8 +518,9 @@
       h(
         'p',
         { class: 'muted advanced-hint' },
-        '小鲸鱼、arXiv 标记等。默认关闭，普通简历不需要；想玩再展开。',
+        '小鲸鱼、arXiv 标记、DeepSeek 水印等。普通简历不需要；想用再展开。',
       ),
+      watermarkBlock,
       whaleBlock,
       stampBlock,
     );
