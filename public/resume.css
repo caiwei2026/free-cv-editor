@@ -76,7 +76,7 @@
   display: flex;
   flex-direction: column;
   min-height: 295mm;
-  padding: 15mm 24mm 13mm;
+  padding: 13mm 24mm 11mm;
 }
 
 /* ---------------- 基本信息 ---------------- */
@@ -373,7 +373,8 @@
 }
 
 .cv-tag-label {
-  flex: 0 0 24mm;
+  flex: 0 0 30mm;
+  white-space: nowrap;
   font-weight: 600;
   color: var(--body-color);
   font-family: var(--font-body);
@@ -797,8 +798,30 @@
     display: none !important;
   }
 
-  .cv-sec,
+  /* 板块可以跨页，但板块标题要跟着下一条内容；条目标题/副标题不单独留在页底；
+     普通分点保持完整，特别长的条目允许跨页，避免整块被推到下一页造成空白。 */
+  .cv-sec {
+    break-inside: auto;
+  }
+
+  .cv-sec-head {
+    break-after: avoid;
+    break-inside: avoid;
+  }
+
   .cv-item {
+    break-inside: auto;
+  }
+
+  .cv-item-top,
+  .cv-item-meta-row,
+  .cv-info-main .cv-item,
+  .cv-list-row {
+    break-inside: avoid;
+    break-after: avoid;
+  }
+
+  .cv-bullet {
     break-inside: avoid;
   }
 

@@ -26,6 +26,7 @@
       title: '新板块',
       icon: 'folder',
       visible: true,
+      hideTitle: false,
       items: [],
       ...fields,
     };
@@ -40,20 +41,20 @@
       showPhoto: false,
     },
     theme: {
-      presetId: 'blue',
-      accent: '#1d4ed8',
+      presetId: 'plain',
+      accent: '#1f2937',
       font: 'sans',
-      heading: 'underline',
+      heading: 'plain',
       density: 'normal',
-      background: 'linear-gradient(180deg, #f4f8ff 0, #ffffff 120mm)',
-      whales: true,
+      background: '#ffffff',
+      whales: false,
       type: {
         info: { font: 'sans', size: 12, weight: 400, color: '#23272e' },
-        body: { font: 'sans', size: 12.5, color: '#3f4652' },
-        heading: { font: 'sans', size: 14.5, color: '' },
+        body: { font: 'sans', size: 14, color: '#3f4652' },
+        heading: { font: 'sans', size: 15.5, color: '' },
       },
       stamp: {
-        enabled: true,
+        enabled: false,
         size: 12,
         columns: [{ id: 'stamp-main', text: DEFAULT_STAMP }],
       },
@@ -65,11 +66,11 @@
         kind: 'info',
         title: '基本信息',
         icon: 'user',
+        hideTitle: true,
         items: [
-          item({ text: '姓名：李 明' }),
-          item({ text: '求职方向：后端开发工程师' }),
-          item({ text: '电话：138-0000-0000' }),
-          item({ text: '邮箱：liming@example.com' }),
+          item({ text: '李 明', style: { size: 20, weight: 650 } }),
+          item({ text: '后端开发工程师', style: { size: 15, weight: 500, color: '#4b5563' } }),
+          item({ text: '电话：138-0000-0000 · 邮箱：liming@example.com · 上海' }),
         ],
       }),
       section({
@@ -513,6 +514,7 @@
         title: String(s.title || '未命名板块'),
         icon: typeof s.icon === 'string' ? s.icon : 'folder',
         visible: s.visible !== false,
+        hideTitle: Boolean(s.hideTitle),
         items: (Array.isArray(s.items) ? s.items : [])
           .filter((i) => i && typeof i === 'object')
           .map((i) => ({

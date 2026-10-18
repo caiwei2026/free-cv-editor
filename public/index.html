@@ -24,6 +24,15 @@
       </div>
 
       <nav class="top-actions" aria-label="工具栏">
+        <div class="history-tools" aria-label="历史">
+          <button class="tb-btn icon-only" id="undo-btn" type="button" title="撤销（⌘Z / Ctrl+Z）" aria-label="撤销" disabled>
+            <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 7 4 12l5 5"/><path d="M4 12h9a5 5 0 0 1 0 10h-2"/></svg>
+          </button>
+          <button class="tb-btn icon-only" id="redo-btn" type="button" title="重做（⇧⌘Z / Ctrl+Y）" aria-label="重做" disabled>
+            <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="m15 7 5 5-5 5"/><path d="M20 12h-9a5 5 0 0 0 0 10h2"/></svg>
+          </button>
+        </div>
+        <span class="tb-sep" aria-hidden="true"></span>
         <button class="tb-btn" type="button" data-panel="theme">
           <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3a9 9 0 1 0 0 18h1.4a2.1 2.1 0 0 0 0-4.2h-.7a1.6 1.6 0 0 1 0-3.2H16a5 5 0 0 0 5-5c0-3.1-4-5.6-9-5.6Z"/><circle cx="8.2" cy="9.2" r="1"/><circle cx="12" cy="7.4" r="1"/><circle cx="7.2" cy="13.4" r="1"/></svg>
           主题
@@ -91,6 +100,8 @@
           <span class="zoom-sep"></span>
           <button class="zoom-btn wide" id="zoom-fit" type="button">适应宽度</button>
           <button class="zoom-btn wide" id="toggle-guide" type="button" title="显示 A4 分页参考线">分页线</button>
+          <span class="zoom-sep"></span>
+          <span class="page-count" id="page-count">约 1 页</span>
         </div>
       </main>
 

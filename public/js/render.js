@@ -127,18 +127,27 @@
 
     const tools = h('div', { class: 'cv-sec-tools' });
     tools.append(toolBtn('plus', () => addItem(sec), '添加条目'));
+    tools.append(
+      toolBtn(
+        sec.hideTitle ? 'eyeOff' : 'eye',
+        () => toggleSectionTitle(sec),
+        sec.hideTitle ? '显示板块标题' : '隐藏板块标题',
+      ),
+    );
     tools.append(toolBtn('up', () => moveSection(sec, -1), '上移板块'));
     tools.append(toolBtn('down', () => moveSection(sec, 1), '下移板块'));
     tools.append(toolBtn('trash', () => removeSection(sec), '删除板块', true));
     el.append(tools);
     bindToolsHover(el, tools);
 
-    const head = h('div', { class: 'cv-sec-head' });
-    if (state().data.theme.whales) head.append(whaleEmoji(sec));
-    head.append(
-      ce(sec, 'title', { tag: 'h2', placeholder: '板块标题', className: 'cv-sec-title' }),
-    );
-    el.append(head);
+    if (!sec.hideTitle) {
+      const head = h('div', { class: 'cv-sec-head' });
+      if (state().data.theme.whales) head.append(whaleEmoji(sec));
+      head.append(
+        ce(sec, 'title', { tag: 'h2', placeholder: '板块标题', className: 'cv-sec-title' }),
+      );
+      el.append(head);
+    }
 
     const body = h('div', { class: 'cv-sec-body' });
     if (sec.kind === 'info') {
@@ -623,6 +632,8 @@
         item.bullets[idx] = value;
       },
     });
+    Object.defineProperty(holder, '__itemId', { value: item.id });
+    Object.defineProperty(holder, '__idx', { value: idx });
     const text = ce(holder, 'text', {
       placeholder: '做了什么、怎么做、结果如何',
       className: 'cv-bullet-text',
@@ -689,6 +700,12 @@
     } else {
       focusSelector(`.cv-item[data-iid="${item.id}"] .cv-tag-label, .cv-item[data-iid="${item.id}"] .cv-list-text`);
     }
+  }
+
+  function toggleSectionTitle(sec) {
+    sec.hideTitle = !sec.hideTitle;
+    renderPage();
+    state().scheduleSave();
   }
 
   function toggleDots(item) {

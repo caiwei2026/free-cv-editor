@@ -450,7 +450,22 @@
     });
     resetBlock.append(resetBtn);
 
-    container.append(whaleBlock, stampBlock, typeBlock, styleBlock, themeBlock, headingBlock, avatarBlock, resetBlock);
+    const advancedBlock = h('details', { class: 'drawer-section advanced-section' });
+    advancedBlock.open = Boolean(App.state.advancedOpen);
+    advancedBlock.addEventListener('toggle', () => {
+      App.state.advancedOpen = advancedBlock.open;
+    });
+    advancedBlock.append(
+      h('summary', { class: 'advanced-summary' }, '个性装饰 / 高级（开发者）'),
+      h(
+        'p',
+        { class: 'muted advanced-hint' },
+        '小鲸鱼、arXiv 标记等。默认关闭，普通简历不需要；想玩再展开。',
+      ),
+      whaleBlock,
+      stampBlock,
+    );
+    container.append(typeBlock, themeBlock, styleBlock, headingBlock, avatarBlock, advancedBlock, resetBlock);
   }
 
   function rangeRow(label, opts) {

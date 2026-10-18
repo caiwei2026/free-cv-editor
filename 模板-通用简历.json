@@ -8,7 +8,7 @@
     "presetId": "plain",
     "accent": "#1f2937",
     "font": "sans",
-    "heading": "underline",
+    "heading": "plain",
     "density": "normal",
     "background": "#ffffff",
     "whales": false,
@@ -21,12 +21,12 @@
       },
       "body": {
         "font": "sans",
-        "size": 12.5,
+        "size": 14,
         "color": "#3f4652"
       },
       "heading": {
         "font": "sans",
-        "size": 14.5,
+        "size": 15.5,
         "color": ""
       }
     },
@@ -54,34 +54,43 @@
       "visible": true,
       "items": [
         {
-          "id": "tpl-item-1",
+          "id": "tpl-info-name",
           "title": "",
           "meta": "",
           "date": "",
-          "text": "姓名：你的名字",
+          "text": "你的名字",
+          "bullets": [],
+          "dots": true,
+          "style": {
+            "size": 20,
+            "weight": 650
+          }
+        },
+        {
+          "id": "tpl-info-target",
+          "title": "",
+          "meta": "",
+          "date": "",
+          "text": "求职方向：目标岗位",
+          "bullets": [],
+          "dots": true,
+          "style": {
+            "size": 14,
+            "weight": 500,
+            "color": "#4b5563"
+          }
+        },
+        {
+          "id": "tpl-info-school",
+          "title": "",
+          "meta": "",
+          "date": "",
+          "text": "大学：你的大学 · 专业：你的专业",
           "bullets": [],
           "dots": true
         },
         {
-          "id": "tpl-item-2",
-          "title": "",
-          "meta": "",
-          "date": "",
-          "text": "大学：你的大学",
-          "bullets": [],
-          "dots": true
-        },
-        {
-          "id": "tpl-item-3",
-          "title": "",
-          "meta": "",
-          "date": "",
-          "text": "专业：你的专业",
-          "bullets": [],
-          "dots": true
-        },
-        {
-          "id": "tpl-item-4",
+          "id": "tpl-info-grad",
           "title": "",
           "meta": "",
           "date": "",
@@ -90,24 +99,16 @@
           "dots": true
         },
         {
-          "id": "tpl-item-5",
+          "id": "tpl-info-contact",
           "title": "",
           "meta": "",
           "date": "",
-          "text": "电话：138-0000-0000",
-          "bullets": [],
-          "dots": true
-        },
-        {
-          "id": "tpl-item-6",
-          "title": "",
-          "meta": "",
-          "date": "",
-          "text": "邮箱：you@example.com",
+          "text": "电话：138-0000-0000 · 邮箱：you@example.com",
           "bullets": [],
           "dots": true
         }
-      ]
+      ],
+      "hideTitle": true
     },
     {
       "id": "tpl-sec-edu",

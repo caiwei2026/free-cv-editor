@@ -15,9 +15,112 @@
     zoom: 1,
     fitMode: true,
     lastSaved: null,
+    save: { local: false, server: false, retrying: false, warned: false },
   });
 
   let serviceConnected = null;
+
+  const history = (App.history = {
+    stack: [],
+    index: -1,
+    limit: 40,
+    timer: 0,
+    suspended: false,
+  });
+
+  function currentSnapshot() {
+    return state.data ? JSON.stringify(state.data) : '';
+  }
+
+  function updateHistoryButtons() {
+    const undoBtn = document.getElementById('undo-btn');
+    const redoBtn = document.getElementById('redo-btn');
+    if (!undoBtn || !redoBtn) return;
+    const current = currentSnapshot();
+    const atTop = history.index >= 0 && history.stack[history.index] === current;
+    const canUndo = history.index > 0 || (history.index >= 0 && !atTop);
+    const canRedo = atTop && history.index < history.stack.length - 1;
+    undoBtn.disabled = !canUndo;
+    redoBtn.disabled = !canRedo;
+  }
+
+  function pushSnapshot(snapshot) {
+    if (history.suspended || !snapshot) return;
+    if (history.index >= 0 && history.stack[history.index] === snapshot) {
+      updateHistoryButtons();
+      return;
+    }
+    if (history.index < history.stack.length - 1) {
+      history.stack = history.stack.slice(0, history.index + 1);
+    }
+    history.stack.push(snapshot);
+    if (history.stack.length > history.limit) history.stack.shift();
+    history.index = history.stack.length - 1;
+    updateHistoryButtons();
+  }
+
+  function scheduleHistory() {
+    clearTimeout(history.timer);
+    history.timer = setTimeout(() => pushSnapshot(currentSnapshot()), 550);
+  }
+
+  function resetHistory() {
+    clearTimeout(history.timer);
+    history.stack = state.data ? [currentSnapshot()] : [];
+    history.index = history.stack.length ? 0 : -1;
+    updateHistoryButtons();
+  }
+
+  function applyHistory(snapshot, label) {
+    history.suspended = true;
+    clearTimeout(history.timer);
+    try {
+      state.data = App.data.normalize(JSON.parse(snapshot));
+      state.activeSection = null;
+      state.selectedSticker = null;
+      closePanel();
+      document.querySelectorAll('.page-pop').forEach((el) => el.remove());
+      App.render.page();
+      App.render.outline();
+      if (typeof syncGuideBtn === 'function') syncGuideBtn();
+      if (typeof updateScale === 'function') updateScale();
+      state.scheduleSave({ history: false });
+    } catch (err) {
+      toast('历史记录读取失败', { error: true });
+    } finally {
+      history.suspended = false;
+      updateHistoryButtons();
+    }
+    if (label) toast(label);
+  }
+
+  function undo() {
+    if (history.suspended || !state.data || history.index < 0) return;
+    const current = currentSnapshot();
+    if (history.stack[history.index] !== current) pushSnapshot(current);
+    if (history.index <= 0) {
+      updateHistoryButtons();
+      return;
+    }
+    history.index -= 1;
+    applyHistory(history.stack[history.index], '已撤销');
+  }
+
+  function redo() {
+    if (history.suspended || !state.data || history.index < 0) return;
+    const current = currentSnapshot();
+    if (history.stack[history.index] !== current) {
+      pushSnapshot(current);
+      updateHistoryButtons();
+      return;
+    }
+    if (history.index >= history.stack.length - 1) {
+      updateHistoryButtons();
+      return;
+    }
+    history.index += 1;
+    applyHistory(history.stack[history.index], '已重做');
+  }
 
   const $ = (selector) => document.querySelector(selector);
   const saveStateEl = () => document.getElementById('save-state');
@@ -64,35 +167,68 @@
   }
 
   // ---------------- 保存 ----------------
+  function timeLabel() {
+    const now = new Date();
+    const pad = (n) => String(n).padStart(2, '0');
+    return `${pad(now.getHours())}:${pad(now.getMinutes())}`;
+  }
+
   function setSaveState(mode) {
     const el = saveStateEl();
     if (!el) return;
-    el.classList.remove('is-saving', 'is-error');
+    el.classList.remove('is-saving', 'is-error', 'is-local');
+    el.removeAttribute('title');
+    state.saveMode = mode;
     if (mode === 'saving') {
       el.textContent = '保存中…';
       el.classList.add('is-saving');
-    } else if (mode === 'error') {
-      el.textContent = '保存失败';
+    } else if (mode === 'local') {
+      el.textContent = '已存浏览器 · 文件待保存';
+      el.classList.add('is-local');
+      el.title = '已写入浏览器缓存，但还没有写入本机 data/resume.json。点击可重试。';
+    } else if (mode === 'saved') {
+      el.textContent = `已保存到本机 · ${timeLabel()}`;
+      el.title = '已写入浏览器缓存和本机 data/resume.json。';
+      state.lastSaved = new Date();
+    } else if (mode === 'fileError') {
+      el.textContent = '浏览器已存 · 文件未保存';
       el.classList.add('is-error');
+      el.title = '浏览器缓存已保存，但写本机文件失败。点击重试。';
+    } else if (mode === 'offline') {
+      el.textContent = '仅存浏览器';
+      el.classList.add('is-local');
+      el.title = '没有连接本地服务，简历只保存在浏览器缓存里。用启动脚本打开可写入文件。';
+    } else if (mode === 'error') {
+      el.textContent = '保存失败，点此重试';
+      el.classList.add('is-error');
+      el.title = '浏览器缓存写入失败。';
     } else {
-      const now = new Date();
-      const pad = (n) => String(n).padStart(2, '0');
-      el.textContent = `已保存 · ${pad(now.getHours())}:${pad(now.getMinutes())}`;
-      state.lastSaved = now;
+      el.textContent = '已载入';
+      el.title = '简历已载入，尚未修改。';
     }
   }
 
   function writeLocal() {
     try {
       localStorage.setItem(KEY, JSON.stringify(state.data));
-      setSaveState('saved');
+      state.save.local = true;
+      if (state.save.server) setSaveState('saved');
+      else setSaveState('local');
+      return true;
     } catch (err) {
+      state.save.local = false;
       setSaveState('error');
-      toast('浏览器缓存满了（可能是图片太大），建议导出备份；服务端文件仍在保存。', { error: true, duration: 5000 });
+      toast('浏览器缓存满了（可能是图片太大），建议导出备份。', { error: true, duration: 5000 });
+      return false;
     }
   }
 
   async function writeServer() {
+    if (location.protocol === 'file:') {
+      state.save.server = false;
+      setSaveState('offline');
+      return false;
+    }
     try {
       const res = await fetch('/api/resume', {
         method: 'POST',
@@ -100,20 +236,46 @@
         body: JSON.stringify({ data: state.data }),
       });
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
-    } catch {
-      /* 本地缓存已保存，服务端失败不阻塞编辑 */
+      state.save.server = true;
+      setSaveState('saved');
+      return true;
+    } catch (err) {
+      state.save.server = false;
+      setSaveState('fileError');
+      if (!state.save.warned) {
+        state.save.warned = true;
+        toast('浏览器里已保存；本机文件没有写入。点右上角保存状态可重试。', { error: true, duration: 5200 });
+      }
+      return false;
     }
   }
 
   const saveLocal = debounce(writeLocal, 320);
   const saveServer = debounce(writeServer, 1600);
 
-  function scheduleSave() {
+  function scheduleSave(options = {}) {
+    state.save.server = false;
+    state.save.warned = false;
     setSaveState('saving');
     saveLocal();
     saveServer();
+    if (options.history === false) clearTimeout(history.timer);
+    else scheduleHistory();
+    updateHistoryButtons();
   }
   state.scheduleSave = scheduleSave;
+
+  function retrySave() {
+    if (state.save.retrying) return;
+    state.save.retrying = true;
+    state.save.warned = false;
+    setSaveState('saving');
+    writeLocal();
+    writeServer().finally(() => {
+      state.save.retrying = false;
+    });
+  }
+  state.retrySave = retrySave;
 
   async function loadData() {
     try {
@@ -159,6 +321,11 @@
     wrap.style.height = `${Math.round(page.offsetHeight * zoom)}px`;
     const label = document.getElementById('zoom-label');
     if (label) label.textContent = `${Math.round(zoom * 100)}%`;
+    const pageMm = page.offsetHeight / (96 / 25.4);
+    const pageCount = Math.max(1, Math.ceil((pageMm - 1) / 297));
+    state.pageCount = pageCount;
+    const countLabel = document.getElementById('page-count');
+    if (countLabel) countLabel.textContent = `约 ${pageCount} 页`;
     App.render.updateStickerBar();
   }
 
@@ -233,6 +400,7 @@
       }
     }
     App.render.page();
+    App.render.outline();
     scheduleSave();
   }
 
@@ -335,10 +503,17 @@
       btn.textContent = '重新检测';
     });
 
+    saveStateEl()?.addEventListener('click', retrySave);
+    document.getElementById('undo-btn')?.addEventListener('click', undo);
+    document.getElementById('redo-btn')?.addEventListener('click', redo);
     document.getElementById('btn-backup')?.addEventListener('click', exportJson);
     document.getElementById('btn-print')?.addEventListener('click', () => {
       App.render.selectSticker(null);
-      toast('打印窗口里勾选「背景图形」、边距选「无」，底色和贴图才会保留', { duration: 5200 });
+      updateScale();
+      toast(
+        `当前约 ${state.pageCount || 1} 页。打印窗口里选「另存为 PDF」、边距「无」、勾选「背景图形」。`,
+        { duration: 5600 },
+      );
       setTimeout(() => window.print(), 700);
     });
 
@@ -405,6 +580,17 @@
 
     document.addEventListener('keydown', (e) => {
       const mod = e.metaKey || e.ctrlKey;
+      if (mod && !e.altKey && (e.key.toLowerCase() === 'z' || e.key.toLowerCase() === 'y')) {
+        const active = document.activeElement;
+        const editing =
+          active && (active.isContentEditable || ['INPUT', 'TEXTAREA', 'SELECT'].includes(active.tagName));
+        if (!editing) {
+          e.preventDefault();
+          if (e.key.toLowerCase() === 'y' || e.shiftKey) redo();
+          else undo();
+          return;
+        }
+      }
       if (mod && e.key.toLowerCase() === 's') {
         e.preventDefault();
         exportJson();
@@ -462,6 +648,8 @@
     exportJson,
     addSection,
     checkService,
+    undo,
+    redo,
   };
 
   // ---------------- 启动 ----------------
@@ -472,7 +660,8 @@
     App.render.outline();
     syncGuideBtn();
     updateScale();
-    setSaveState('saved');
+    resetHistory();
+    setSaveState('idle');
     if (document.fonts?.ready) document.fonts.ready.then(() => updateScale());
     setTimeout(() => updateScale(), 120);
 

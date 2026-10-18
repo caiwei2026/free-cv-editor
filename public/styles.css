@@ -124,6 +124,27 @@ select {
   background: #fbeceb;
 }
 
+.save-state.is-local {
+  color: #6b5a12;
+  background: #fbf5df;
+}
+
+.save-state.is-error,
+.save-state.is-local {
+  cursor: pointer;
+}
+
+.history-tools {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+}
+
+.tb-btn:disabled {
+  opacity: 0.35;
+  cursor: default;
+}
+
 .top-actions {
   display: flex;
   align-items: center;
@@ -2072,4 +2093,98 @@ select {
   font-size: 9px;
   font-weight: 700;
   letter-spacing: -0.4px;
+}
+
+
+.page-count {
+  padding: 0 8px;
+  font-size: 11px;
+  color: var(--ink-3);
+  white-space: nowrap;
+  font-variant-numeric: tabular-nums;
+}
+
+
+.polish-compare {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: 8px;
+}
+
+.polish-col {
+  min-width: 0;
+}
+
+.polish-label {
+  display: block;
+  margin: 0 0 4px;
+  font-size: 10px;
+  color: var(--ink-3);
+}
+
+.polish-original {
+  font-size: 12px;
+  line-height: 1.65;
+  color: #6b6f78;
+  background: #f7f5f1;
+  border: 1px solid #eee9e1;
+  border-radius: 8px;
+  padding: 9px 10px;
+  max-height: 190px;
+  overflow: auto;
+  white-space: pre-wrap;
+}
+
+.polish-compare .polish-text {
+  max-height: 190px;
+  overflow: auto;
+}
+
+
+/* 个性化 / 开发者设置默认收起 */
+.advanced-section {
+  padding: 0;
+  overflow: hidden;
+}
+
+.advanced-section > summary.advanced-summary {
+  padding: 11px 13px;
+  font-size: 12px;
+  font-weight: 650;
+  color: var(--ink-2);
+  cursor: pointer;
+  list-style: none;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.advanced-section > summary.advanced-summary::-webkit-details-marker {
+  display: none;
+}
+
+.advanced-section > summary.advanced-summary::after {
+  content: "＋";
+  color: var(--ink-3);
+  font-weight: 400;
+}
+
+.advanced-section[open] > summary.advanced-summary::after {
+  content: "－";
+}
+
+.advanced-section > .advanced-hint {
+  margin: 0 13px 10px;
+  font-size: 10.5px;
+  line-height: 1.6;
+  color: var(--ink-3);
+}
+
+.advanced-section > .drawer-section {
+  padding: 0 13px 6px;
+  border-top: 1px solid var(--line-2);
+}
+
+.advanced-section > .drawer-section + .drawer-section {
+  border-top: 0;
 }

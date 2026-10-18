@@ -59,7 +59,7 @@
   const aiState = {
     style: { loading: false, error: '', result: null, prompt: '' },
     sticker: { loading: false, error: '', result: null, prompt: '' },
-    polish: { loading: false, error: '', result: null, original: '', instruction: '' },
+    polish: { loading: false, error: '', result: null, original: '', instruction: '', target: null },
   };
 
   async function ask({ system, user, maxTokens = 1600, temperature = 0.8 }) {
@@ -286,7 +286,40 @@
     if (!f.node || !f.obj || !f.field) return null;
     const text = String(f.obj[f.field] || '').trim();
     if (!text) return null;
-    return { obj: f.obj, field: f.field, node: f.node, text };
+    const target = { obj: f.obj, field: f.field, node: f.node, text };
+    if (f.obj.__itemId != null && f.obj.__idx != null) {
+      target.bullet = { itemId: f.obj.__itemId, idx: f.obj.__idx };
+    }
+    return target;
+  }
+
+  function findResumeObj(id) {
+    for (const sec of App.state.data.sections) {
+      if (sec.id === id) return sec;
+      const item = sec.items.find((it) => it.id === id);
+      if (item) return item;
+    }
+    return null;
+  }
+
+  function resolvePolishTarget(target) {
+    if (!target) return null;
+    if (target.bullet) {
+      const item = findResumeObj(target.bullet.itemId);
+      if (!item || !Array.isArray(item.bullets) || target.bullet.idx < 0) return null;
+      if (target.bullet.idx >= item.bullets.length) return null;
+      if (String(item.bullets[target.bullet.idx] || '').trim() !== target.text) return null;
+      return { item, idx: target.bullet.idx, node: target.node };
+    }
+    let obj = target.obj;
+    if (obj && obj.id) {
+      const found = findResumeObj(obj.id);
+      if (found) obj = found;
+      else if (!target.node || !target.node.isConnected) return null;
+    }
+    if (!obj) return null;
+    if (String(obj[target.field] || '').trim() !== target.text) return null;
+    return { obj, field: target.field, node: target.node };
   }
 
   function polish(host, instruction, label) {
@@ -295,7 +328,7 @@
       toast('先在简历上点一下要修改的那段文字', { error: true });
       return;
     }
-    aiState.polish = { loading: true, error: '', result: null, original: target.text, instruction, label };
+    aiState.polish = { loading: true, error: '', result: null, original: target.text, instruction, label, target };
     paintPolishResult(host);
 
     ask({
@@ -312,11 +345,12 @@
           original: target.text,
           instruction,
           label,
+          target,
         };
         sync(host, paintPolishResult);
       })
       .catch((err) => {
-        aiState.polish = { loading: false, error: err.message, result: null, original: target.text, instruction };
+        aiState.polish = { loading: false, error: err.message, result: null, original: target.text, instruction, target };
         sync(host, paintPolishResult);
       });
   }
@@ -338,19 +372,29 @@
     const head = h('div', { class: 'ai-result-head' });
     head.innerHTML = `${icon('wand', 14)}<span>改写结果</span>`;
     const box = h('div', { class: 'polish-text', text: state.result });
+    const compare = h('div', { class: 'polish-compare' });
+    const origCol = h('div', { class: 'polish-col' });
+    origCol.append(
+      h('span', { class: 'polish-label', text: '原文' }),
+      h('div', { class: 'polish-original', text: state.original }),
+    );
+    const newCol = h('div', { class: 'polish-col' });
+    newCol.append(h('span', { class: 'polish-label', text: '改写后' }), box);
+    compare.append(origCol, newCol);
     const actions = h('div', { class: 'btn-row', style: 'margin-top:10px' });
-    const applyBtn = h('button', { class: 'btn accent', type: 'button' }, '替换原文');
+    const applyBtn = h('button', { class: 'btn accent', type: 'button', title: '只替换生成时选中的那段文字' }, '替换原文');
     applyBtn.addEventListener('click', () => {
-      const target = currentTarget();
-      if (!target) {
-        toast('那段文字已经失效了，重新点一下再试', { error: true });
+      const live = resolvePolishTarget(state.target);
+      if (!live) {
+        toast('生成时选中的原文已经变化或被删除，请重新生成', { error: true });
         return;
       }
-      target.obj[target.field] = state.result;
-      if (target.node?.isConnected) target.node.textContent = state.result;
+      if (live.item) live.item.bullets[live.idx] = state.result;
+      else live.obj[live.field] = state.result;
+      if (live.node?.isConnected) live.node.textContent = state.result;
       else App.render.page();
       App.state.scheduleSave();
-      toast('已替换');
+      toast('已替换，可用顶部撤销恢复');
       aiState.polish.result = null;
       paintPolishResult(host);
     });
@@ -369,7 +413,7 @@
       paintPolishResult(host);
     });
     actions.append(applyBtn, copyBtn, discard);
-    card.append(head, box, actions);
+    card.append(head, compare, actions);
     host.append(card);
   }
 
@@ -378,7 +422,7 @@
     container.innerHTML = '';
 
     const intro = h('div', { class: 'ai-intro' });
-    intro.innerHTML = `${icon('sparkle', 15)}<div><strong>DeepSeek · deepseek-flash</strong><span>走本机 DSH 登录态调用，不用填 Key。一般 2–5 秒返回。</span></div>`;
+    intro.innerHTML = `${icon('sparkle', 15)}<div><strong>AI 助手</strong><span>先润色经历，再考虑背景和贴图。生成结果先预览，确认后才写入。</span></div>`;
     container.append(intro);
 
     // 背景风格
@@ -468,6 +512,7 @@
     polishBlock.append(targetBox, presetRow, customRow, polishResult);
     paintPolishResult(polishResult);
     container.append(polishBlock);
+    container.insertBefore(polishBlock, styleBlock);
 
     const foot = h('p', { class: 'ai-foot' });
     foot.innerHTML = `生成的内容会先给你预览，点「应用 / 替换」才写进简历。AI 输出可能不稳，不满意就再生成一次。`;
