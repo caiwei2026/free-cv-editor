@@ -157,15 +157,17 @@
       wrap.append(main);
 
       const meta = state().data.meta;
+      const photoWrap = h('div', { class: 'cv-photo' });
       if (meta.showPhoto && meta.photo) {
         const img = h('img', { class: 'cv-avatar', src: meta.photo, alt: '头像', title: '点击更换头像' });
         img.addEventListener('click', () => App.ui.openPanel('theme'));
-        wrap.append(img);
+        photoWrap.append(img);
       } else if (meta.showPhoto) {
         const ph = h('button', { class: 'cv-avatar cv-avatar-empty', type: 'button', title: '上传头像' }, '＋ 头像');
         ph.addEventListener('click', () => App.ui.openPanel('theme'));
-        wrap.append(ph);
+        photoWrap.append(ph);
       }
+      if (photoWrap.childNodes.length) wrap.append(photoWrap);
       body.append(wrap);
     } else {
       sec.items.forEach((item) => body.append(renderItem(sec, item)));
@@ -1279,13 +1281,16 @@
 
     const watermark = data.theme.watermark;
     if (watermark && watermark.enabled && watermark.src) {
+      const watermarkStyle = watermark.center
+        ? `width:${watermark.width}mm;top:50%;left:50%;transform:translate(-50%,-50%);opacity:${watermark.opacity};`
+        : `width:${watermark.width}mm;top:${watermark.top}mm;right:${watermark.right}mm;opacity:${watermark.opacity};`;
       page.append(
         h('img', {
           class: 'page-watermark',
           src: watermark.src,
           alt: '',
           'aria-hidden': 'true',
-          style: `width:${watermark.width}mm;top:${watermark.top}mm;right:${watermark.right}mm;opacity:${watermark.opacity};`,
+          style: watermarkStyle,
         }),
       );
     }

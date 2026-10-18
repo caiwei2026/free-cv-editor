@@ -451,12 +451,22 @@
     resetBlock.append(resetBtn);
 
     const watermark = theme.watermark || {};
-    const watermarkBlock = sectionBlock('背景水印', '右上角 · DeepSeek 鲸鱼');
+    const watermarkBlock = sectionBlock('背景水印', '整页居中 · DeepSeek 鲸鱼');
     const watermarkToggle = h('div', { class: 'row between' });
-    watermarkToggle.append(h('span', { class: 'muted', text: '显示右上角鲸鱼水印' }));
+    watermarkToggle.append(h('span', { class: 'muted', text: '显示鲸鱼水印' }));
     watermarkToggle.append(
       switchControl(Boolean(watermark.enabled), (on) => {
         watermark.enabled = on;
+        App.ui.applyTheme({ watermark });
+        rerender();
+      }),
+    );
+
+    const wmCenterRow = h('div', { class: 'row between', style: 'margin-top:8px' });
+    wmCenterRow.append(h('span', { class: 'muted', text: '整页居中' }));
+    wmCenterRow.append(
+      switchControl(Boolean(watermark.center), (on) => {
+        watermark.center = on;
         App.ui.applyTheme({ watermark });
         rerender();
       }),
@@ -490,8 +500,8 @@
       class: 'slider',
       type: 'range',
       min: '20',
-      max: '60',
-      step: '2',
+      max: '120',
+      step: '1',
       value: String(Math.round(watermark.width ?? 36)),
       'aria-label': '水印大小',
     });
@@ -503,9 +513,14 @@
     wmSizeRow.append(wmSizeHead, wmSize);
     watermarkBlock.append(
       watermarkToggle,
+      wmCenterRow,
       wmOpacityRow,
       wmSizeRow,
-      h('p', { class: 'muted', style: 'margin:2px 0 0' }, '官方 DeepSeek 鲸鱼图标；默认 50% 透明度，随 PDF 一起打印。'),
+      h(
+        'p',
+        { class: 'muted', style: 'margin:2px 0 0' },
+        '整页居中时约 105mm（页面宽度的 50%）；关闭居中会回到右上角。官方 DeepSeek 鲸鱼，随 PDF 打印。',
+      ),
     );
 
     const advancedBlock = h('details', { class: 'drawer-section advanced-section' });

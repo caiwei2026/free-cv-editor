@@ -65,6 +65,7 @@
         width: 36,
         top: 8,
         right: 8,
+        center: false,
       },
     },
     view: { guide: true },
@@ -487,9 +488,10 @@
           ? watermarkSource.src.trim()
           : 'assets/deepseek-whale.svg',
       opacity: num(watermarkSource.opacity, 0.05, 0.9, 0.5),
-      width: num(watermarkSource.width, 12, 80, 36),
+      width: num(watermarkSource.width, 12, 150, 36),
       top: num(watermarkSource.top, 0, 40, 8),
       right: num(watermarkSource.right, 0, 40, 8),
+      center: Boolean(watermarkSource.center),
     };
 
     data.view = { guide: true, ...(raw.view || {}) };
