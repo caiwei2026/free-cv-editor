@@ -224,9 +224,23 @@
   display: block;
 }
 
-.cv-item-top.is-stacked .cv-item-date {
-  display: block;
+.cv-item-top.is-stacked .cv-date-wrap {
+  display: flex;
+  margin-left: 0;
   margin-top: 0.4mm;
+}
+
+.cv-item-top.is-stacked .cv-item-date {
+  display: inline;
+  margin: 0;
+}
+
+.cv-date-wrap,
+.cv-list-date-wrap {
+  display: inline-flex;
+  align-items: center;
+  gap: 1.4mm;
+  margin-left: auto;
 }
 
 .cv-item-title {
@@ -261,7 +275,8 @@
   opacity: 0.82;
 }
 
-.cv-meta-clear {
+.cv-meta-clear,
+.cv-date-clear {
   display: none;
   width: 14px;
   height: 14px;
@@ -276,12 +291,15 @@
   flex: 0 0 auto;
 }
 
-.cv-item-meta-row:hover .cv-meta-clear {
+.cv-item-meta-row:hover .cv-meta-clear,
+.cv-date-wrap:hover .cv-date-clear,
+.cv-list-date-wrap:hover .cv-date-clear {
   display: grid;
   place-items: center;
 }
 
-.cv-meta-clear:hover {
+.cv-meta-clear:hover,
+.cv-date-clear:hover {
   background: #fbe6e3;
   color: #c0392b;
 }
@@ -733,6 +751,7 @@
   .cv-sec-tools,
   .cv-item-tools,
   .cv-meta-clear,
+  .cv-date-clear,
   .cv-bullet-del,
   .page-pop {
     display: none !important;

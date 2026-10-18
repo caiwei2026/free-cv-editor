@@ -377,8 +377,9 @@
     });
   }
 
-  function openFields(item, anchor) {
+  function openFields(item, anchor, kind = 'timeline') {
     const fields = item.fields || { title: true, date: true, meta: true };
+    const isList = kind === 'list';
     openPagePop(anchor, (pop) => {
       pop.append(popHead('这一条显示'));
       const check = (label, checked, onChange, sub) => {
@@ -399,21 +400,23 @@
       };
       check('标题', fields.title !== false, (v) => commit({ title: v }));
       check('时间', fields.date !== false, (v) => commit({ date: v }));
-      check('说明', fields.meta !== false, (v) => commit({ meta: v }));
-      const stack = check(
-        '时间另起一行',
-        Boolean(item.dateBelow),
-        (v) => {
-          item.dateBelow = v;
-          state().scheduleSave();
-          closePagePop();
-          renderPage();
-          App.ui.updateScale();
-        },
-        true,
-      );
-      stack.disabled = fields.date === false;
-      pop.append(h('p', { class: 'page-pop-hint' }, '隐藏的字段不会出现在纸上，内容仍保留，随时可以再打开。'));
+      if (!isList) {
+        check('副标题（职位 / 城市）', fields.meta !== false, (v) => commit({ meta: v }));
+        const stack = check(
+          '时间另起一行',
+          Boolean(item.dateBelow),
+          (v) => {
+            item.dateBelow = v;
+            state().scheduleSave();
+            closePagePop();
+            renderPage();
+            App.ui.updateScale();
+          },
+          true,
+        );
+        stack.disabled = fields.date === false;
+      }
+      pop.append(h('p', { class: 'page-pop-hint' }, '用这里的开关隐藏时内容会保留；点 × 会直接清空并隐藏这一行。'));
     });
   }
 
@@ -477,8 +480,14 @@
       infoLine = ce(item, 'text', { placeholder: '姓名：你的名字', className: 'cv-info-line' });
       applyInfoLineStyle(item, infoLine);
     }
-    if (sec.kind === 'timeline') {
-      tools.append(toolBtn('plus', () => addBullet(sec, item), '添加一条描述'));
+    if (sec.kind === 'timeline' || sec.kind === 'text') {
+      tools.append(
+        toolBtn(
+          'plus',
+          () => addBullet(sec, item),
+          sec.kind === 'text' ? '添加一条分点' : '添加一条描述',
+        ),
+      );
       if (item.bullets.length) {
         tools.append(
           toolBtn(
@@ -488,8 +497,15 @@
           ),
         );
       }
+    }
+    if (sec.kind === 'timeline') {
       let fieldsBtn;
-      fieldsBtn = toolBtn('sliders', () => openFields(item, fieldsBtn), '显示 / 隐藏标题、时间、说明');
+      fieldsBtn = toolBtn('sliders', () => openFields(item, fieldsBtn, 'timeline'), '显示 / 隐藏标题、时间、副标题');
+      tools.append(fieldsBtn);
+    }
+    if (sec.kind === 'list') {
+      let fieldsBtn;
+      fieldsBtn = toolBtn('sliders', () => openFields(item, fieldsBtn, 'list'), '显示 / 隐藏标题、时间');
       tools.append(fieldsBtn);
     }
     if (sec.kind === 'info') {
@@ -518,7 +534,21 @@
           top.append(ce(item, 'title', { placeholder: '公司 / 学校 / 项目名', className: 'cv-item-title' }));
         }
         if (showDate) {
-          top.append(ce(item, 'date', { placeholder: '时间', className: 'cv-item-date' }));
+          const dateWrap = h('span', { class: 'cv-date-wrap' });
+          dateWrap.append(ce(item, 'date', { placeholder: '时间', className: 'cv-item-date' }));
+          const clearDate = h(
+            'button',
+            { class: 'cv-date-clear', type: 'button', title: '删除这一行（可在字段菜单恢复）' },
+            '×',
+          );
+          clearDate.addEventListener('click', () => {
+            item.date = '';
+            item.fields = { ...(item.fields || {}), date: false };
+            renderPage();
+            state().scheduleSave();
+          });
+          dateWrap.append(clearDate);
+          top.append(dateWrap);
         }
         el.append(top);
       }
@@ -526,9 +556,14 @@
       if (showMeta) {
         const metaRow = h('div', { class: 'cv-item-meta-row' });
         metaRow.append(ce(item, 'meta', { placeholder: '职位 · 城市', className: 'cv-item-meta' }));
-        const clear = h('button', { class: 'cv-meta-clear', type: 'button', title: '删除这一行' }, '×');
+        const clear = h(
+          'button',
+          { class: 'cv-meta-clear', type: 'button', title: '删除这一行（可在字段菜单恢复）' },
+          '×',
+        );
         clear.addEventListener('click', () => {
           item.meta = '';
+          item.fields = { ...(item.fields || {}), meta: false };
           renderPage();
           state().scheduleSave();
         });
@@ -541,15 +576,39 @@
       el.append(ul);
     } else if (sec.kind === 'text') {
       el.append(ce(item, 'text', { tag: 'p', placeholder: '写一段自我介绍…', className: 'cv-text', singleLine: false }));
+      if (item.bullets.length) {
+        const ul = h('ul', { class: `cv-bullets${item.dots === false ? ' no-dots' : ''}` });
+        item.bullets.forEach((_, idx) => ul.append(renderBullet(item, idx)));
+        el.append(ul);
+      }
     } else if (sec.kind === 'tags') {
       const row = h('div', { class: 'cv-tag-row' });
       row.append(ce(item, 'title', { placeholder: '分类', className: 'cv-tag-label' }));
       row.append(ce(item, 'text', { placeholder: '关键词 1 / 关键词 2', className: 'cv-tag-value' }));
       el.append(row);
     } else if (sec.kind === 'list') {
+      const fields = item.fields || {};
       const row = h('div', { class: 'cv-list-row' });
-      row.append(ce(item, 'title', { placeholder: '内容', className: 'cv-list-text' }));
-      row.append(ce(item, 'date', { placeholder: '时间', className: 'cv-list-date' }));
+      if (fields.title !== false) {
+        row.append(ce(item, 'title', { placeholder: '内容', className: 'cv-list-text' }));
+      }
+      if (fields.date !== false) {
+        const dateWrap = h('span', { class: 'cv-list-date-wrap' });
+        dateWrap.append(ce(item, 'date', { placeholder: '时间', className: 'cv-list-date' }));
+        const clearDate = h(
+          'button',
+          { class: 'cv-date-clear', type: 'button', title: '删除这一行（可在字段菜单恢复）' },
+          '×',
+        );
+        clearDate.addEventListener('click', () => {
+          item.date = '';
+          item.fields = { ...(item.fields || {}), date: false };
+          renderPage();
+          state().scheduleSave();
+        });
+        dateWrap.append(clearDate);
+        row.append(dateWrap);
+      }
       el.append(row);
     }
     return el;
