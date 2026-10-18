@@ -1,0 +1,254 @@
+{
+  "version": 1,
+  "meta": {
+    "photo": "",
+    "showPhoto": false
+  },
+  "theme": {
+    "presetId": "plain",
+    "accent": "#1f2937",
+    "font": "sans",
+    "heading": "underline",
+    "density": "normal",
+    "background": "#ffffff",
+    "whales": false,
+    "type": {
+      "info": {
+        "font": "sans",
+        "size": 12,
+        "color": "#23272e",
+        "weight": 400
+      },
+      "body": {
+        "font": "sans",
+        "size": 12.5,
+        "color": "#3f4652"
+      },
+      "heading": {
+        "font": "sans",
+        "size": 14.5,
+        "color": ""
+      }
+    },
+    "stamp": {
+      "enabled": false,
+      "size": 12,
+      "columns": [
+        {
+          "id": "tpl-stamp-1",
+          "text": "arXiv:XXXX.XXXXXv1 [cs.SE] 18 Oct 2026"
+        }
+      ]
+    }
+  },
+  "view": {
+    "guide": true
+  },
+  "stickers": [],
+  "sections": [
+    {
+      "id": "tpl-sec-info",
+      "kind": "info",
+      "title": "基本信息",
+      "icon": "user",
+      "visible": true,
+      "items": [
+        {
+          "id": "tpl-item-1",
+          "title": "",
+          "meta": "",
+          "date": "",
+          "text": "姓名：你的名字",
+          "bullets": [],
+          "dots": true
+        },
+        {
+          "id": "tpl-item-2",
+          "title": "",
+          "meta": "",
+          "date": "",
+          "text": "大学：你的大学",
+          "bullets": [],
+          "dots": true
+        },
+        {
+          "id": "tpl-item-3",
+          "title": "",
+          "meta": "",
+          "date": "",
+          "text": "专业：你的专业",
+          "bullets": [],
+          "dots": true
+        },
+        {
+          "id": "tpl-item-4",
+          "title": "",
+          "meta": "",
+          "date": "",
+          "text": "预计毕业时间：2027.06",
+          "bullets": [],
+          "dots": true
+        },
+        {
+          "id": "tpl-item-5",
+          "title": "",
+          "meta": "",
+          "date": "",
+          "text": "电话：138-0000-0000",
+          "bullets": [],
+          "dots": true
+        },
+        {
+          "id": "tpl-item-6",
+          "title": "",
+          "meta": "",
+          "date": "",
+          "text": "邮箱：you@example.com",
+          "bullets": [],
+          "dots": true
+        }
+      ]
+    },
+    {
+      "id": "tpl-sec-edu",
+      "kind": "timeline",
+      "title": "教育经历",
+      "icon": "graduation",
+      "visible": true,
+      "items": [
+        {
+          "id": "tpl-item-7",
+          "title": "学校名称",
+          "meta": "专业 · 学历 · 城市",
+          "date": "2023.09 – 2027.06",
+          "text": "",
+          "bullets": [],
+          "dots": true
+        }
+      ]
+    },
+    {
+      "id": "tpl-sec-intern",
+      "kind": "timeline",
+      "title": "实习经历",
+      "icon": "briefcase",
+      "visible": true,
+      "items": [
+        {
+          "id": "tpl-item-8",
+          "title": "公司名称",
+          "meta": "职位 · 城市",
+          "date": "2026.06 – 2026.09",
+          "text": "",
+          "bullets": [
+            "负责的业务和范围，一句话说清楚",
+            "你的关键动作与可量化的结果"
+          ],
+          "dots": true
+        }
+      ]
+    },
+    {
+      "id": "tpl-sec-proj",
+      "kind": "timeline",
+      "title": "项目经历",
+      "icon": "folder",
+      "visible": true,
+      "items": [
+        {
+          "id": "tpl-item-9",
+          "title": "项目名称",
+          "meta": "角色 · 城市",
+          "date": "2025.09 – 2026.01",
+          "text": "",
+          "bullets": [
+            "项目背景与目标",
+            "你的关键动作与量化结果"
+          ],
+          "dots": true
+        }
+      ]
+    },
+    {
+      "id": "tpl-sec-skill",
+      "kind": "tags",
+      "title": "专业技能",
+      "icon": "code",
+      "visible": true,
+      "items": [
+        {
+          "id": "tpl-item-10",
+          "title": "编程语言",
+          "meta": "",
+          "date": "",
+          "text": "语言 1 / 语言 2 / 语言 3",
+          "bullets": [],
+          "dots": true
+        },
+        {
+          "id": "tpl-item-11",
+          "title": "工具与框架",
+          "meta": "",
+          "date": "",
+          "text": "工具 1、工具 2、工具 3",
+          "bullets": [],
+          "dots": true
+        },
+        {
+          "id": "tpl-item-12",
+          "title": "语言能力",
+          "meta": "",
+          "date": "",
+          "text": "中文（母语）· 英语（CET-6）",
+          "bullets": [],
+          "dots": true
+        }
+      ]
+    },
+    {
+      "id": "tpl-sec-award",
+      "kind": "list",
+      "title": "荣誉奖项",
+      "icon": "award",
+      "visible": true,
+      "items": [
+        {
+          "id": "tpl-item-13",
+          "title": "奖项或证书名称",
+          "meta": "",
+          "date": "2026",
+          "text": "",
+          "bullets": [],
+          "dots": true
+        },
+        {
+          "id": "tpl-item-14",
+          "title": "奖项或证书名称",
+          "meta": "",
+          "date": "2025",
+          "text": "",
+          "bullets": [],
+          "dots": true
+        }
+      ]
+    },
+    {
+      "id": "tpl-sec-summary",
+      "kind": "text",
+      "title": "自我评价",
+      "icon": "user",
+      "visible": true,
+      "items": [
+        {
+          "id": "tpl-item-15",
+          "title": "",
+          "meta": "",
+          "date": "",
+          "text": "用 2–3 句话概括你的方向、优势和最能说明能力的成果；不要写空话。",
+          "bullets": [],
+          "dots": true
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,26 @@
+# 个人简历数据：只存在本机，不进入 git，也不上传
+data/
+
+# 本地环境变量、密钥、备份
+.env
+.env.*
+*.local
+*.bak
+*.pem
+*.key
+
+# 日志和临时文件
+*.log
+.tmp/
+tmp/
+
+# 依赖
+node_modules/
+
+# 系统文件
+.DS_Store
+**/.DS_Store
+Thumbs.db
+
+# 构建产物：可分发压缩包单独发布，不放进源码仓库
+*.zip
