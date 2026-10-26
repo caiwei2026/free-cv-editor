@@ -24,3 +24,9 @@ Thumbs.db
 
 # 构建产物：可分发压缩包单独发布，不放进源码仓库
 *.zip
+
+# local resume builds (contain personal data)
+overleaf-zh/
+overleaf-en/
+简历-*.pdf
+Resume-*.pdf
